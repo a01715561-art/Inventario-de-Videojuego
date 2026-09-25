@@ -1,0 +1,6 @@
+Escopeta_W870 8 4.5
+Hierba_Verde 1 0.2
+Pistola_SG09R 3 1.2
+Cuchillo_Combate 2 0.8
+Granada_Ofensiva 1 0.5
+Lanzacohetes 16 12.0
