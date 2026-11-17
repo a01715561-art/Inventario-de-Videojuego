@@ -1,70 +1,248 @@
-# Inventario de Videojuego (Estilo Resident Evil 4)
+# Sistema de Inventario - Maletín (Estilo Resident Evil 4)
 
-Este proyecto es un sistema de inventario inspirado en el maletín de Resident Evil 4. Sirve para guardar, ver, buscar y ordenar objetos (Armas, Municiones, Curas, Tesoros) basándose en su nombre, tamaño y peso.
+## Descripción
 
-Para organizar el inventario rápido, el programa usa el algoritmo Merge Sort. Además, utilicé la estructura `std::vector` porque facilita iterar sobre los datos para mostrarlos en consola y hacer búsquedas al instante.
+Este proyecto es un sistema de inventario inspirado en el clásico maletín de Resident Evil 4, desarrollado en C++ para almacenar, organizar, buscar y consultar objetos (Armas, Municiones, Curas, Tesoros).
+Cada objeto contiene:
 
-**Descripción del avance 1**
-En la primera entrega me enfoqué en lo básico:
+* Nombre
+* Tamaño
+* Peso
 
-* Crear la estructura `Objeto` con los atributos: nombre, tamaño y peso.
-* Leer los datos iniciales desde un archivo `objetos.txt`.
-* Implementar Merge Sort para ordenar por nombre, tamaño o peso.
-* Hacer un menú de consola sencillo.
+En este avance, el programa carga los registros desde el archivo `objetos.txt`, los almacena como objetos de tipo `Objeto` dentro de una lista ligada dinámica (ej. `LinkedList<Objeto>`) y permite mostrarlos, ordenarlos (por nombre, tamaño o peso), realizar búsquedas específicas por nombre, y guardar el estado actual.
 
-**Descripción del avance 2**
-Para este segundo avance agregué la parte de búsqueda y justifiqué las estructuras:
+Como corrección del primer avance, se reemplazó la estructura estática/contigua (`std::vector`) por una estructura de datos dinámica propia basada en nodos enlazados, cumpliendo con los estándares de manejo de memoria requeridos.
 
-* **Uso de `std::vector`:** Dejé el vector como la estructura principal porque es muy fácil de recorrer y maneja la memoria de forma continua.
-* **Búsqueda lineal:** Agregué la opción 5 en el menú para buscar un objeto por nombre y ver sus estadísticas.
-* **Menú actualizado:** Ahora permite ver el inventario, ordenar por los 3 atributos, buscar un ítem en específico y salir.
+## Cómo usar el programa
 
-**Cambios sobre el primer avance**
+Compilar desde la terminal:
+`g++ main.cpp -o maletin`
 
-1. **Opción de búsqueda:** Antes solo se podía ordenar y ver el maletín. Ahora el usuario puede buscar un objeto en específico. La búsqueda es lineal O(n) porque revisa el vector hasta encontrar la coincidencia.
-2. **Análisis de estructuras:** Se explicó a fondo por qué se eligió un vector en lugar de un arreglo estático tradicional, cubriendo la rúbrica de estructuras de datos.
+Ejecutar:
+`./maletin`
 
-**Instrucciones de compilación y ejecución**
+Al iniciar, el programa carga automáticamente la información almacenada en `objetos.txt` y muestra el siguiente menú:
 
-1. Abre la terminal en la carpeta del proyecto.
-2. Compila con: `g++ main.cpp -o maletin.exe`
-3. Ejecuta con: `.\maletin.exe`
+```text
+===== MALETÍN RE4 =====
+1. Ver inventario
+2. Ordenar por Nombre
+3. Ordenar por Tamaño
+4. Ordenar por Peso
+5. Buscar objeto
+6. Guardar inventario y Salir
+Selecciona una opcion:
 
-**Entradas del programa**
-El programa lee un archivo llamado `objetos.txt`. Cada línea debe tener los datos separados por un espacio: `Nombre Tamaño Peso`.
+```
+
+Las opciones permiten visualizar los ítems, organizarlos bajo tres criterios distintos utilizando el algoritmo Merge Sort, buscar un elemento específico en tiempo real, y exportar los datos al salir.
+
+## Estructura de datos
+
+Para almacenar los objetos del maletín se utiliza una lista ligada (Linked List):
+`LinkedList<Objeto> inventario;`
+
+Cada nodo de la lista contiene un objeto y un apuntador al siguiente elemento:
+`T value;`
+`Node<T>* next;`
+
+La lista también mantiene un control de sus extremos y tamaño:
+`Node<T>* head;`
+`Node<T>* tail;`
+`int size;`
+
+Se seleccionó una lista ligada dinámica porque el inventario necesita instanciar objetos en memoria bajo demanda sin requerir bloques contiguos pre-asignados, simulando la flexibilidad de meter y sacar objetos del maletín.
+
+## Complejidad de la LinkedList
+
+### insertion()
+
+La inserción se realiza directamente al final utilizando el apuntador `tail`.
+
+* Mejor caso: O(1)
+* Caso promedio: O(1)
+* Peor caso: O(1)
+No es necesario recorrer la lista completa para insertar un nuevo nodo al final del inventario.
+
+### search()
+
+La búsqueda comienza desde `head` y avanza nodo por nodo comparando el string del nombre.
+
+* Mejor caso: O(1)
+* Caso promedio: O(n)
+* Peor caso: O(n)
+El mejor caso ocurre cuando el objeto es el primero en el maletín. El peor caso ocurre cuando está al final o no existe.
+
+### clear()
+
+La función elimina todos los nodos de la lista liberando la memoria dinámica.
+
+* Mejor caso: O(n)
+* Caso promedio: O(n)
+* Peor caso: O(n)
+
+### printInventory() (Mostrar)
+
+Recorre todos los nodos desde el inicio hasta el fin para imprimir la tabla.
+
+* O(n)
+
+### getSize(), getHead()
+
+Estas funciones regresan directamente un valor o apuntador almacenado.
+
+* O(1)
+
+## Carga de información
+
+Los registros iniciales se cargan desde:
+`objetos.txt`
+
+Cada línea contiene un objeto y sus datos están separados por espacios.
 Ejemplo:
 `Pocion_Curacion 1 0.5`
 
-**Salidas del programa**
+La función de carga crea un objeto `Objeto` por cada línea y lo inserta en la lista mediante:
+`inventario.insertion(nuevoObjeto);`
 
-1. **Ver inventario:** Imprime una tabla con todos los objetos, su tamaño y peso.
-2. **Ordenar:** Muestra un mensaje confirmando el filtro usado y vuelve a imprimir la tabla ya ordenada.
-3. **Buscar:** Si encuentra el objeto, imprime sus datos. Si no, lanza el mensaje "Objeto no encontrado en el maletin".
+Como se recorren los *n* registros del archivo y cada inserción cuesta O(1):
 
-**Desarrollo de competencias**
+* Mejor caso: O(n)
+* Caso promedio: O(n)
+* Peor caso: O(n)
 
-**SICT0301: Evalúa los componentes**
+## Algoritmo de ordenamiento
 
-* **Complejidad de algoritmos de ordenamiento:**
-Implementé Merge Sort. Su complejidad temporal es de log n) en el mejor, promedio y peor caso. Esto pasa porque el algoritmo siempre divide el arreglo a la mitad log (n) y luego mezcla las partes O(n), sin importar si los datos ya estaban ordenados o no. Su complejidad espacial es O(n) porque necesita un vector temporal para hacer la mezcla.
-* **Complejidad de la estructura de datos:**
-Usé un `std::vector`.
-* Acceder a un dato por índice es O(1).
-* Insertar un dato al final (`push_back`) es O(1) casi siempre, aunque en el peor caso (cuando se llena y pide más memoria) es O(n).
-* Buscar un elemento recorriendo el vector de inicio a fin es O(n).
+Para organizar el maletín se utiliza **Merge Sort** adaptado para funcionar sobre nodos enlazados.
+La misma implementación recursiva se utiliza para tres criterios distintos:
+1 -> Nombre (Alfabético)
+2 -> Tamaño (Entero)
+3 -> Peso (Flotante)
+Esto centraliza la lógica y evita tener múltiples funciones de ordenamiento duplicadas.
 
+### Complejidad de Merge Sort
 
+Merge Sort divide recursivamente la lista en dos mitades y posteriormente vuelve a unirlas ordenadamente.
+La relación de recurrencia es:
+`T(n) = 2T(n/2) + O(n)`
 
-**SICT0302: Toma decisiones**
+Por lo tanto:
 
-* **Selección del algoritmo:**
-Elegí Merge Sort porque es estable y siempre tarda lo mismo log (n). La estabilidad es clave aquí: si ordeno el maletín por tamaño, los objetos que miden lo mismo van a mantener el orden que ya tenían antes (por ejemplo, alfabético). Otros algoritmos como Quick Sort no aseguran esa estabilidad, y Bubble Sort es demasiado lento O(n^2).
-* **Selección de la estructura:**
-Elegí `std::vector` por encima de las listas ligadas o los arreglos estáticos porque los elementos están contiguos en la memoria. Como mi programa se la pasa imprimiendo el inventario completo en consola y buscando ítems, la lectura en un vector corre muy bien y aprovecha mejor el caché.
+* Mejor caso: O(n log n)
+* Caso promedio: O(n log n)
+* Peor caso: O(n log n)
 
-**SICT0303: Implementa acciones científicas**
+La función de división (encontrar el punto medio de la lista ligada mediante punteros rápido/lento) toma:
 
-* **Funciones de consulta:**
-Hice una función de búsqueda lineal iterando directamente sobre el vector. Compara el texto que mete el usuario con el nombre de cada objeto. Si lo encuentra, rompe el ciclo (`break`) para no gastar recursos de más buscando en el resto del arreglo.
-* **Lectura de archivos:**
-Usé la librería `<fstream>`. Antes de intentar leer, el programa revisa si el archivo existe con `is_open()`. Si todo está bien, un ciclo `while` lee línea por línea y mete los datos al vector con `push_back()`. Esto hace que el código sea seguro y evita que el programa se cierre de golpe si falta el archivo `.txt`.
+* O(n)
+La función que combina (hace el *merge*) de las mitades ordenadas toma:
+* O(n)
+La función recursiva completa mantiene siempre una complejidad asintótica de:
+* O(n log n)
+
+### Justificación del algoritmo
+
+Se eligió Merge Sort en lugar de Quick Sort o Bubble Sort principalmente por dos razones:
+
+1. **Rendimiento constante:** Mantiene un tiempo de ejecución garantizado de O(n log n) independientemente de si el maletín ya estaba parcialmente ordenado o completamente desordenado.
+2. **Estabilidad:** Merge Sort es un algoritmo estable. En el contexto de un inventario, esto es vital. Si los objetos ya están ordenados alfabéticamente (por nombre) y el usuario decide ordenarlos por "Tamaño", los objetos que tengan exactamente el mismo tamaño conservarán su orden alfabético original. Algoritmos inestables romperían esta coherencia visual.
+
+## Mostrar Inventario
+
+La función que imprime el maletín recorre todos los nodos de la estructura desde `head` hasta `nullptr`.
+
+* Mejor caso: O(n)
+* Caso promedio: O(n)
+* Peor caso: O(n)
+
+## Búsqueda por Nombre
+
+El programa permite buscar un objeto específico ingresando su nombre. Al encontrar coincidencias exactas, se detiene para ahorrar recursos.
+Sin embargo, teóricamente la evaluación del recorrido es secuencial:
+
+* Mejor caso: O(1) (Si está al inicio)
+* Caso promedio: O(n)
+* Peor caso: O(n) (Si está al final o no existe)
+
+## Escritura de archivos
+
+La función de guardado recorre todos los nodos de la lista ligada y escribe las propiedades de cada objeto en `inventario_guardado.txt` (o sobreescribe el original).
+
+* Mejor caso: O(n)
+* Caso promedio: O(n)
+* Peor caso: O(n)
+El archivo se actualiza para asegurar la persistencia de los datos procesados durante la sesión.
+
+## Complejidad final del programa
+
+Las principales operaciones del maletín tienen las siguientes complejidades:
+
+* Cargar objetos: O(n)
+* Mostrar inventario: O(n)
+* Buscar objeto: O(n)
+* Guardar inventario: O(n)
+* Ordenar con Merge Sort: O(n log n)
+
+Para un flujo típico donde el usuario carga el archivo, ordena el maletín, y visualiza la tabla resultante:
+`O(n) + O(n log n) + O(n)`
+
+El término dominante matemático es:
+`O(n log n)`
+
+Por lo tanto, la complejidad final de ese flujo operativo es:
+`O(n log n)`
+
+---
+
+## SICT0301 - Evalúa los componentes
+
+Se realizó el análisis de complejidad exhaustivo de la estructura dinámica de datos (Linked List) y de sus principales operaciones.
+También se analizaron las funciones:
+
+* Lectura y carga desde archivo (.txt)
+* Impresión a consola (Mostrar inventario)
+* Búsqueda iterativa de strings
+* Escritura hacia archivo local
+* Algoritmo Merge Sort (mejor, promedio y peor caso)
+Se concluyó correctamente que la operación asintótica con mayor crecimiento (el cuello de botella) en el sistema es el ordenamiento de los objetos, estableciéndose en:
+`O(n log n)`
+
+## SICT0302 - Toma decisiones
+
+Se seleccionó una Lista Ligada Dinámica en lugar de un `std::vector` porque el objetivo arquitectónico es gestionar la memoria en tiempo de ejecución sin depender de bloques contiguos.
+Una primera ventaja de esta estructura es que permite crecer el maletín teóricamente sin la necesidad de redimensionar arreglos costosos (como ocurre cuando un vector estalla su capacidad máxima).
+Además, mantener apuntadores a la cabeza (`head`) y la cola (`tail`) permite registrar nuevos objetos encontrados en el juego directamente al final del inventario con una complejidad temporal de:
+`O(1)`
+
+La razón principal para adaptar esta estructura es que las mecánicas de un inventario suelen ser de acceso secuencial. Mostrar todos los objetos, buscar un ítem por nombre, o guardar la partida, son todas operaciones de recorrido directo, las cuales calzan a la perfección con la naturaleza O(n) de las listas enlazadas. Al estar trabajando en memoria principal (RAM), el impacto por *overhead* de no tener acceso contiguo en caché es imperceptible para este caso de uso.
+
+También se justificó fuertemente la selección de **Merge Sort** para la estructura, logrando en todos los escenarios posibles:
+`O(n log n)`
+Esta elección no solo provee excelente escalabilidad, sino que su cualidad de algoritmo **estable** garantiza que los múltiples criterios de filtrado (nombre, luego tamaño, luego peso) funcionen armónicamente en cascada sin mezclar caóticamente a los ítems que empatan en valor.
+
+## SICT0303 - Implementa acciones científicas
+
+El sistema carga los datos puros desde un documento externo físico:
+`objetos.txt`
+directamente hacia el ecosistema de la estructura de datos dinámica mediante `ifstream`, validando la preexistencia del archivo con `is_open()` para evitar colapsos.
+El programa provee robustos mecanismos para consultar los datos, tales como:
+
+* Despliegue tabulado de todos los nodos.
+* Búsqueda por coincidencia de cadenas (strings).
+Finalmente, cuando el usuario termina de gestionar su maletín, el software extrae los datos de la lista dinámica y utiliza `ofstream` para serializarlos y escribirlos de nuevo en un archivo de texto. Esta acción cumple íntegramente con el ciclo científico de obtención de datos, procesamiento de estructuras, y exportación/persistencia de resultados.
+
+---
+
+## Estado actual del proyecto
+
+El sistema del Maletín RE4 actualmente permite:
+
+* Cargar un inventario inicial desde `objetos.txt` previniendo errores de lectura.
+* Almacenar los objetos de forma no contigua usando una Lista Ligada propia.
+* Mostrar todo el contenido estructuradamente.
+* Ordenar los ítems por **Nombre** usando Merge Sort.
+* Ordenar los ítems por **Tamaño** usando Merge Sort.
+* Ordenar los ítems por **Peso** usando Merge Sort.
+* Efectuar búsquedas lineales por nombre de objeto.
+* Guardar de manera persistente el estado actual (ordenamiento) del inventario en un documento externo de salida.
+* Evaluar correctamente y de forma desglosada la complejidad espacial y temporal (Mejor, Promedio y Peor Caso) de todas las facetas del software.
