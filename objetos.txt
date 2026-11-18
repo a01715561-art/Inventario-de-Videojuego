@@ -1,0 +1,10 @@
+Escopeta 8 4.5
+Hierba_V 1 0.2
+Pistola 3 1.2
+Cuchillo 2 0.8
+Granada 1 0.5
+Lanzacohetes 16 12.0
+Red9 3 1.5
+TMP 6 2.5
+Rifle 9 4.0
+Magnum 8 3.5
